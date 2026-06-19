@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: aipathshala
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PAYMENT_SANDBOX
+        value: "true"
+      - key: NODE_VERSION
+        value: "20"
+# The app auto-seeds demo data on first boot when the database is empty.
+# Free tier has an ephemeral filesystem (data resets on redeploy/sleep) but the
+# app re-seeds automatically, so the site always works. For data that survives
+# restarts, upgrade to a paid instance and add a disk mounted at ./data, or
+# migrate src/db.js to a managed Postgres database.

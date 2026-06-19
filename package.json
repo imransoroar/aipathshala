@@ -1,0 +1,28 @@
+{
+  "name": "aipathshala",
+  "version": "1.0.0",
+  "description": "AI Pathshala - bilingual (Bangla/English) online course platform (LMS)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node src/seed.js"
+  },
+  "keywords": [
+    "lms",
+    "elearning",
+    "bangla",
+    "ai",
+    "courses"
+  ],
+  "author": "AI Pathshala",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

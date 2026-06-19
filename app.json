@@ -1,0 +1,11 @@
+{
+  "name": "AI Pathshala",
+  "description": "Bilingual (Bangla/English) online course platform (LMS) with student, payment and admin features.",
+  "repository": "https://github.com/YOUR_USERNAME/aipathshala",
+  "keywords": ["lms", "elearning", "bangla", "ai", "express"],
+  "env": {
+    "JWT_SECRET": { "description": "Long random secret for signing logins", "generator": "secret" },
+    "PAYMENT_SANDBOX": { "description": "true = simulated payments; false = live gateways", "value": "true" }
+  },
+  "formation": { "web": { "quantity": 1 } }
+}
