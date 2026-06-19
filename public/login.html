@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="bn" data-lang="bn">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login — AI Pathshala</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header id="site-header"></header>
+<main class="page"><div class="container">
+  <div class="auth-wrap">
+    <h1 data-i18n="login_title"></h1>
+    <form id="loginForm">
+      <div class="field"><label data-i18n="email"></label><input class="input" type="email" id="email" required></div>
+      <div class="field"><label data-i18n="password"></label><input class="input" type="password" id="password" required></div>
+      <button class="btn btn-primary btn-block" type="submit" data-i18n="login"></button>
+    </form>
+    <p class="auth-alt"><span data-i18n="no_account"></span> <a href="/register.html" data-i18n="signup"></a></p>
+    <div class="demo-hint">
+      <b>Demo:</b><br>Admin: admin@aipathshala.com / admin123<br>Student: student@aipathshala.com / student123
+    </div>
+  </div>
+</div></main>
+<footer id="site-footer"></footer>
+<script src="/js/i18n.js"></script>
+<script src="/js/api.js"></script>
+<script>
+const next = new URLSearchParams(location.search).get('next') || '/dashboard.html';
+document.addEventListener('DOMContentLoaded', ()=>{
+  document.getElementById('loginForm').onsubmit = async (e)=>{
+    e.preventDefault();
+    try{
+      await API.login(document.getElementById('email').value.trim(), document.getElementById('password').value);
+      location.href = next;
+    }catch(err){ toast(err.message,'err'); }
+  };
+});
+</script>
+<script src="/js/app.js"></script>
+</body>
+</html>

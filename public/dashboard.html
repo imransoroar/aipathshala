@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="bn" data-lang="bn">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Learning — AI Pathshala</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header id="site-header"></header>
+<main class="page"><div class="container">
+  <div class="page-head"><h1 data-i18n="my_learning"></h1><p class="muted" id="hello"></p></div>
+  <div class="stat-grid" id="stats"></div>
+  <h2 data-i18n="my_learning"></h2>
+  <div class="course-grid" id="learnGrid"><div class="spinner"></div></div>
+  <h2 style="margin-top:40px" data-i18n="my_orders"></h2>
+  <div id="ordersWrap"></div>
+</div></main>
+<footer id="site-footer"></footer>
+<script src="/js/i18n.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/components.js"></script>
+<script>
+function learnCard(e){
+  const c = e.course;
+  return `<a class="course-card" href="/learn.html?course=${c.id}">
+    <div class="course-thumb">${c.thumbnail?`<img src="${c.thumbnail}" onerror="this.style.display='none'">`:''}
+      <span class="course-badge">${levelLabel(c.level)}</span></div>
+    <div class="course-body">
+      <h3 class="course-title">${L(c,'title')}</h3>
+      <div class="muted" style="font-size:.85rem">${e.progress.completed}/${e.progress.total} ${t('lessons')} • ${e.progress.percent}% ${t('complete')}</div>
+      <div class="progress-bar"><span style="width:${e.progress.percent}%"></span></div>
+    </div>
+    <div class="course-foot"><span class="muted">${c.instructor}</span><span class="btn btn-primary btn-sm">${t('continue')}</span></div>
+  </a>`;
+}
+async function load(){
+  if(!requireLogin()) return;
+  const u = API.user();
+  document.getElementById('hello').textContent = t('welcome_back')+', '+(u?u.name:'');
+  try{
+    const [{enrollments}, {orders}] = await Promise.all([API.get('/enrollments'), API.get('/payments/orders')]);
+    const paid = orders.filter(o=>o.status==='paid');
+    document.getElementById('stats').innerHTML = `
+      <div class="stat-card"><b>${enrollments.length}</b><span class="muted">${t('my_learning')}</span></div>
+      <div class="stat-card"><b>${enrollments.filter(e=>e.progress.percent===100).length}</b><span class="muted">${t('completed')}</span></div>
+      <div class="stat-card"><b>${paid.length}</b><span class="muted">${t('my_orders')}</span></div>`;
+    const lg = document.getElementById('learnGrid');
+    lg.innerHTML = enrollments.length ? enrollments.map(learnCard).join('') : `<div class="empty">${t('empty_learning')} <br><a class="btn btn-primary btn-sm" style="margin-top:12px" href="/courses.html">${t('all_courses')}</a></div>`;
+    document.getElementById('ordersWrap').innerHTML = orders.length ? `
+      <table class="table"><thead><tr><th>Invoice</th><th>${t('nav_courses')}</th><th>${t('total')}</th><th>Gateway</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>${orders.map(o=>`<tr>
+        <td>${o.invoice}</td><td>${getLang()==='bn'&&o.courseTitleBn?o.courseTitleBn:o.courseTitle}</td>
+        <td>${money(o.amount,o.currency)}</td><td>${o.gateway}</td>
+        <td><span class="pill ${o.status==='paid'?'green':o.status==='pending'?'amber':'gray'}">${o.status}</span></td>
+        <td>${new Date(o.createdAt).toLocaleDateString()}</td></tr>`).join('')}</tbody></table>`
+      : `<p class="muted">—</p>`;
+  }catch(e){ toast(e.message,'err'); }
+}
+document.addEventListener('DOMContentLoaded', load);
+document.addEventListener('langchange', load);
+</script>
+<script src="/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="bn" data-lang="bn">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Learn — AI Pathshala</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header id="site-header"></header>
+<div id="root"><div class="spinner"></div></div>
+<script src="/js/i18n.js"></script>
+<script src="/js/api.js"></script>
+<script>
+const courseId = new URLSearchParams(location.search).get('course');
+let PLAYER=null, current=0;
+
+async function load(){
+  if(!requireLogin()) return;
+  try{ PLAYER = await API.get('/enrollments/'+courseId+'/player'); render(); }
+  catch(e){ document.getElementById('root').innerHTML = `<div class="page container"><div class="empty">${e.message}<br><a class="btn btn-primary btn-sm" style="margin-top:12px" href="/courses.html">${t('all_courses')}</a></div></div>`; }
+}
+
+function render(){
+  const {course, lessons, progress} = PLAYER;
+  const l = lessons[current];
+  const embed = l.videoUrl ? `<iframe src="${l.videoUrl}" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe>` : '<div style="color:#fff;display:grid;place-items:center;height:100%">No video</div>';
+  const done = l.completed;
+  document.getElementById('root').innerHTML = `
+  <div class="learn-layout">
+    <div class="player-main">
+      <div class="player-video">${embed}</div>
+      <div class="player-info">
+        <div class="muted" style="font-size:.85rem">${L(course,'title')} • ${current+1}/${lessons.length}</div>
+        <h2>${L(l,'title')}</h2>
+        <button class="btn ${done?'btn-ghost':'btn-accent'}" id="completeBtn" style="${done?'color:#9ae6b4;border-color:#2f7d4f':''}">
+          ${done?'✓ '+t('completed'):t('mark_complete')}
+        </button>
+        ${current<lessons.length-1?`<button class="btn btn-primary" id="nextBtn" style="margin-${getLang()==='bn'?'right':'left'}:10px">${t('continue')} →</button>`:''}
+        <p style="margin-top:18px;white-space:pre-line">${L(l,'content')||''}</p>
+      </div>
+    </div>
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <b>${t('curriculum')}</b>
+        <div class="muted" style="font-size:.85rem">${progress.completed}/${progress.total} • ${progress.percent}%</div>
+        <div class="progress-bar"><span style="width:${progress.percent}%"></span></div>
+      </div>
+      ${lessons.map((x,i)=>`<div class="s-lesson ${i===current?'active':''} ${x.completed?'done':''}" data-i="${i}">
+        <div class="tick">${x.completed?'✓':i+1}</div>
+        <div><div style="font-weight:600;font-size:.92rem">${L(x,'title')}</div><div class="muted" style="font-size:.8rem">${x.durationMin||0} min</div></div>
+      </div>`).join('')}
+    </aside>
+  </div>`;
+  document.querySelectorAll('.s-lesson').forEach(s=>s.onclick=()=>{ current=Number(s.dataset.i); render(); });
+  const cb=document.getElementById('completeBtn');
+  if(cb) cb.onclick=async()=>{
+    try{ const r=await API.post('/enrollments/'+courseId+'/complete',{lessonId:l.id, done:!done});
+      PLAYER.lessons[current].completed=!done; PLAYER.progress=r.progress; render();
+      if(!done) toast('✓','ok');
+    }catch(e){ toast(e.message,'err'); }
+  };
+  const nb=document.getElementById('nextBtn');
+  if(nb) nb.onclick=()=>{ current++; render(); window.scrollTo(0,0); };
+  applyI18n();
+}
+document.addEventListener('DOMContentLoaded', load);
+document.addEventListener('langchange', ()=>{ if(PLAYER) render(); });
+</script>
+<script src="/js/app.js"></script>
+</body>
+</html>

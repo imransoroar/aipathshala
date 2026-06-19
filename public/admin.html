@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="bn" data-lang="bn">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin — AI Pathshala</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header id="site-header"></header>
+<div class="admin-layout">
+  <aside class="admin-side" id="adminNav">
+    <a data-tab="dash" class="active" data-i18n="dash"></a>
+    <a data-tab="courses" data-i18n="manage_courses"></a>
+    <a data-tab="users" data-i18n="manage_users"></a>
+    <a data-tab="orders" data-i18n="orders"></a>
+  </aside>
+  <main class="admin-main" id="adminMain"><div class="spinner"></div></main>
+</div>
+
+<div class="modal-bg" id="modalBg"><div class="modal" id="modalBox"></div></div>
+
+<script src="/js/i18n.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/components.js"></script>
+<script>
+let TAB='dash';
+function guard(){ if(!API.isAuthed()){ location.href='/login.html?next=/admin.html'; return false; }
+  if(!API.isAdmin()){ document.querySelector('.admin-layout').innerHTML='<div class="empty container">403 — Admin only</div>'; return false; } return true; }
+
+const M = document.getElementById('modalBg'), MB = document.getElementById('modalBox');
+function openModal(html){ MB.innerHTML=html; M.classList.add('open'); }
+function closeModal(){ M.classList.remove('open'); }
+M.onclick=(e)=>{ if(e.target===M) closeModal(); };
+
+async function render(){
+  const main = document.getElementById('adminMain');
+  main.innerHTML='<div class="spinner"></div>';
+  try{
+    if(TAB==='dash') await renderDash(main);
+    else if(TAB==='courses') await renderCourses(main);
+    else if(TAB==='users') await renderUsers(main);
+    else if(TAB==='orders') await renderOrders(main);
+  }catch(e){ main.innerHTML=`<div class="empty">${e.message}</div>`; }
+  applyI18n();
+}
+
+async function renderDash(main){
+  const {stats, recentOrders} = await API.get('/admin/stats');
+  main.innerHTML = `
+  <h1 data-i18n="dash">${t('dash')}</h1>
+  <div class="stat-grid">
+    <div class="stat-card"><b>${stats.students}</b><span class="muted">${t('students')}</span></div>
+    <div class="stat-card"><b>${stats.publishedCourses}/${stats.courses}</b><span class="muted">${t('manage_courses')}</span></div>
+    <div class="stat-card"><b>${stats.enrollments}</b><span class="muted">${t('nav_dashboard')}</span></div>
+    <div class="stat-card"><b>${stats.paidOrders}</b><span class="muted">${t('orders')}</span></div>
+    <div class="stat-card"><b>${money(stats.revenue,'BDT')}</b><span class="muted">${t('revenue')}</span></div>
+  </div>
+  <h2 style="margin-top:20px">${t('orders')}</h2>
+  <table class="table"><thead><tr><th>Invoice</th><th>${t('manage_users')}</th><th>${t('nav_courses')}</th><th>${t('total')}</th><th>Status</th></tr></thead>
+  <tbody>${recentOrders.map(o=>`<tr><td>${o.invoice}</td><td>${o.userName}</td><td>${o.courseTitle}</td><td>${money(o.amount,o.currency)}</td>
+    <td><span class="pill ${o.status==='paid'?'green':o.status==='pending'?'amber':'gray'}">${o.status}</span></td></tr>`).join('')||`<tr><td colspan=5 class="muted">—</td></tr>`}</tbody></table>`;
+}
+
+async function renderCourses(main){
+  const {courses} = await API.get('/admin/courses');
+  main.innerHTML = `
+  <div class="section-head"><h1 data-i18n="manage_courses">${t('manage_courses')}</h1>
+    <button class="btn btn-primary" id="addCourse">+ ${t('add_course')}</button></div>
+  <table class="table"><thead><tr><th>${t('title')}</th><th>${t('price')}</th><th>${t('lessons')}</th><th>${t('students')}</th><th>Status</th><th>${t('actions')}</th></tr></thead>
+  <tbody>${courses.map(c=>`<tr>
+    <td><b>${c.title}</b><div class="muted" style="font-size:.8rem">${c.titleBn||''}</div></td>
+    <td>${money(c.discountPrice&&c.discountPrice<c.price?c.discountPrice:c.price,'BDT')}</td>
+    <td>${c.lessonCount}</td><td>${c.studentCount}</td>
+    <td><span class="pill ${c.published?'green':'gray'}">${c.published?t('publish'):t('draft')}</span></td>
+    <td>
+      <button class="btn btn-sm btn-ghost" onclick="editCourse(${c.id})">${t('edit')}</button>
+      <button class="btn btn-sm btn-ghost" onclick="manageLessons(${c.id},'${(c.title||'').replace(/'/g,'')}')">${t('lessons')}</button>
+      <button class="btn btn-sm btn-danger" onclick="delCourse(${c.id})">${t('delete')}</button>
+    </td></tr>`).join('')}</tbody></table>`;
+  document.getElementById('addCourse').onclick=()=>editCourse(null);
+}
+
+window.editCourse = async (id)=>{
+  let c={title:'',titleBn:'',summary:'',summaryBn:'',description:'',descriptionBn:'',price:0,discountPrice:0,level:'beginner',category:'',instructor:'',thumbnail:'',tags:[],published:true,featured:false};
+  if(id){ const all=await API.get('/admin/courses'); c=all.courses.find(x=>x.id===id)||c; }
+  openModal(`
+    <h3>${id?t('edit'):t('add_course')}</h3>
+    <div class="grid2">
+      <div class="field"><label>${t('title')} (EN)</label><input class="input" id="f_title" value="${c.title||''}"></div>
+      <div class="field"><label>${t('title')} (বাংলা)</label><input class="input" id="f_titleBn" value="${c.titleBn||''}"></div>
+    </div>
+    <div class="field"><label>Summary (EN)</label><input class="input" id="f_summary" value="${(c.summary||'').replace(/"/g,'&quot;')}"></div>
+    <div class="field"><label>সারাংশ (বাংলা)</label><input class="input" id="f_summaryBn" value="${(c.summaryBn||'').replace(/"/g,'&quot;')}"></div>
+    <div class="field"><label>Description (EN)</label><textarea class="input" id="f_description" rows="2">${c.description||''}</textarea></div>
+    <div class="field"><label>বর্ণনা (বাংলা)</label><textarea class="input" id="f_descriptionBn" rows="2">${c.descriptionBn||''}</textarea></div>
+    <div class="grid2">
+      <div class="field"><label>${t('price')} (৳)</label><input class="input" type="number" id="f_price" value="${c.price||0}"></div>
+      <div class="field"><label>Discount price (৳)</label><input class="input" type="number" id="f_discountPrice" value="${c.discountPrice||0}"></div>
+      <div class="field"><label>Category</label><input class="input" id="f_category" value="${c.category||''}"></div>
+      <div class="field"><label>Level</label><select id="f_level">
+        <option value="beginner" ${c.level==='beginner'?'selected':''}>Beginner</option>
+        <option value="intermediate" ${c.level==='intermediate'?'selected':''}>Intermediate</option>
+        <option value="advanced" ${c.level==='advanced'?'selected':''}>Advanced</option></select></div>
+      <div class="field"><label>${t('instructor')}</label><input class="input" id="f_instructor" value="${c.instructor||''}"></div>
+      <div class="field"><label>Thumbnail URL</label><input class="input" id="f_thumbnail" value="${c.thumbnail||''}"></div>
+    </div>
+    <div class="field"><label>Tags (comma separated)</label><input class="input" id="f_tags" value="${(c.tags||[]).join(', ')}"></div>
+    <div style="display:flex;gap:18px;margin:10px 0">
+      <label><input type="checkbox" id="f_published" ${c.published?'checked':''}> ${t('publish')}</label>
+      <label><input type="checkbox" id="f_featured" ${c.featured?'checked':''}> ${t('featured')}</label>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeModal()">${t('cancel')}</button>
+      <button class="btn btn-primary" id="saveCourse">${t('save')}</button>
+    </div>`);
+  document.getElementById('saveCourse').onclick=async()=>{
+    const body={};['title','titleBn','summary','summaryBn','description','descriptionBn','category','level','instructor','thumbnail','tags'].forEach(k=>body[k]=document.getElementById('f_'+k).value);
+    body.price=Number(document.getElementById('f_price').value)||0;
+    body.discountPrice=Number(document.getElementById('f_discountPrice').value)||0;
+    body.published=document.getElementById('f_published').checked;
+    body.featured=document.getElementById('f_featured').checked;
+    try{ if(id) await API.patch('/admin/courses/'+id,body); else await API.post('/admin/courses',body);
+      toast(t('save'),'ok'); closeModal(); render();
+    }catch(e){ toast(e.message,'err'); }
+  };
+};
+
+window.delCourse = async (id)=>{ if(!confirm('Delete this course?')) return;
+  try{ await API.del('/admin/courses/'+id); toast(t('delete'),'ok'); render(); }catch(e){ toast(e.message,'err'); } };
+
+window.manageLessons = async (courseId,title)=>{
+  const {lessons} = await API.get('/admin/courses/'+courseId+'/lessons');
+  openModal(`
+    <h3>${t('lessons')} — ${title}</h3>
+    <div id="lessonList">${lessons.map(l=>`<div class="lesson-item" style="margin-bottom:8px">
+      <div class="ix">${l.order}</div>
+      <div class="l-title">${l.title}<div class="muted" style="font-size:.78rem">${l.durationMin}m ${l.preview?'• preview':''}</div></div>
+      <button class="btn btn-sm btn-ghost" onclick="editLesson(${courseId},${l.id})">${t('edit')}</button>
+      <button class="btn btn-sm btn-danger" onclick="delLesson(${courseId},${l.id},'${title.replace(/'/g,'')}')">×</button>
+    </div>`).join('')||`<p class="muted">—</p>`}</div>
+    <button class="btn btn-primary btn-sm" onclick="editLesson(${courseId},null)" style="margin-top:8px">+ ${t('lessons')}</button>
+    <div style="text-align:right;margin-top:14px"><button class="btn btn-ghost" onclick="closeModal()">${t('cancel')}</button></div>`);
+};
+
+window.editLesson = async (courseId,id)=>{
+  let l={title:'',titleBn:'',videoUrl:'',content:'',durationMin:0,order:'',preview:false};
+  if(id){ const {lessons}=await API.get('/admin/courses/'+courseId+'/lessons'); l=lessons.find(x=>x.id===id)||l; }
+  openModal(`
+    <h3>${id?t('edit'):''} ${t('lessons')}</h3>
+    <div class="grid2">
+      <div class="field"><label>${t('title')} (EN)</label><input class="input" id="l_title" value="${(l.title||'').replace(/"/g,'&quot;')}"></div>
+      <div class="field"><label>${t('title')} (বাংলা)</label><input class="input" id="l_titleBn" value="${(l.titleBn||'').replace(/"/g,'&quot;')}"></div>
+    </div>
+    <div class="field"><label>Video URL (YouTube embed)</label><input class="input" id="l_videoUrl" value="${l.videoUrl||''}"></div>
+    <div class="field"><label>Notes / content</label><textarea class="input" id="l_content" rows="2">${l.content||''}</textarea></div>
+    <div class="grid2">
+      <div class="field"><label>Duration (min)</label><input class="input" type="number" id="l_durationMin" value="${l.durationMin||0}"></div>
+      <div class="field"><label>Order</label><input class="input" type="number" id="l_order" value="${l.order||''}"></div>
+    </div>
+    <label><input type="checkbox" id="l_preview" ${l.preview?'checked':''}> ${t('preview')}</label>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+      <button class="btn btn-ghost" onclick="closeModal()">${t('cancel')}</button>
+      <button class="btn btn-primary" id="saveLesson">${t('save')}</button>
+    </div>`);
+  document.getElementById('saveLesson').onclick=async()=>{
+    const body={title:l_title.value,titleBn:l_titleBn.value,videoUrl:l_videoUrl.value,content:l_content.value,
+      durationMin:Number(l_durationMin.value)||0,preview:l_preview.checked};
+    if(l_order.value) body.order=Number(l_order.value);
+    try{ if(id) await API.patch('/admin/lessons/'+id,body); else await API.post('/admin/courses/'+courseId+'/lessons',body);
+      toast(t('save'),'ok'); manageLessons(courseId,''); render();
+    }catch(e){ toast(e.message,'err'); }
+  };
+};
+window.delLesson = async (courseId,id,title)=>{ if(!confirm('Delete lesson?')) return;
+  try{ await API.del('/admin/lessons/'+id); toast('×','ok'); manageLessons(courseId,title); render(); }catch(e){ toast(e.message,'err'); } };
+
+async function renderUsers(main){
+  const {users} = await API.get('/admin/users');
+  main.innerHTML = `<h1 data-i18n="manage_users">${t('manage_users')}</h1>
+  <table class="table"><thead><tr><th>${t('name')}</th><th>${t('email')}</th><th>${t('phone')}</th><th>Role</th><th>${t('nav_dashboard')}</th><th>${t('actions')}</th></tr></thead>
+  <tbody>${users.map(u=>`<tr><td>${u.name}</td><td>${u.email}</td><td>${u.phone||'-'}</td>
+    <td><span class="pill ${u.role==='admin'?'blue':'gray'}">${u.role}</span></td><td>${u.enrollments}</td>
+    <td><button class="btn btn-sm btn-ghost" onclick="toggleRole(${u.id},'${u.role}')">${u.role==='admin'?'→ student':'→ admin'}</button></td></tr>`).join('')}</tbody></table>`;
+}
+window.toggleRole = async (id,role)=>{ try{ await API.patch('/admin/users/'+id,{role:role==='admin'?'student':'admin'}); toast(t('save'),'ok'); render(); }catch(e){ toast(e.message,'err'); } };
+
+async function renderOrders(main){
+  const {orders} = await API.get('/admin/orders');
+  main.innerHTML = `<h1 data-i18n="orders">${t('orders')}</h1>
+  <table class="table"><thead><tr><th>Invoice</th><th>${t('name')}</th><th>${t('nav_courses')}</th><th>${t('total')}</th><th>Gateway</th><th>Status</th><th>Date</th></tr></thead>
+  <tbody>${orders.map(o=>`<tr><td>${o.invoice}</td><td>${o.userName}<div class="muted" style="font-size:.78rem">${o.userEmail}</div></td>
+    <td>${o.courseTitle}</td><td>${money(o.amount,o.currency)}</td><td>${o.gateway}</td>
+    <td><span class="pill ${o.status==='paid'?'green':o.status==='pending'?'amber':'gray'}">${o.status}</span></td>
+    <td>${new Date(o.createdAt).toLocaleDateString()}</td></tr>`).join('')||`<tr><td colspan=7 class="muted">—</td></tr>`}</tbody></table>`;
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  if(!guard()) return;
+  document.querySelectorAll('#adminNav a').forEach(a=>a.onclick=()=>{
+    document.querySelectorAll('#adminNav a').forEach(x=>x.classList.remove('active'));
+    a.classList.add('active'); TAB=a.dataset.tab; render();
+  });
+  render();
+});
+document.addEventListener('langchange', render);
+</script>
+<script src="/js/app.js"></script>
+</body>
+</html>

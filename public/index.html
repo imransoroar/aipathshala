@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="bn" data-lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Pathshala — এআই পাঠশালা</title>
+<meta name="description" content="সহজ বাংলায় এআই, প্রোগ্রামিং ও ডেটা সায়েন্স শিখুন।">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header id="site-header"></header>
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <h1 data-i18n="hero_title"></h1>
+      <p data-i18n="hero_sub"></p>
+      <div class="hero-cta">
+        <a href="/courses.html" class="btn btn-primary" data-i18n="hero_cta"></a>
+        <a href="/register.html" class="btn btn-ghost" data-i18n="hero_cta2"></a>
+      </div>
+      <div class="hero-stats">
+        <div><b id="stCourses">—</b><span class="muted" data-i18n="all_courses"></span></div>
+        <div><b id="stStudents">2K+</b><span class="muted" data-i18n="students"></span></div>
+        <div><b>4.8★</b><span class="muted" data-i18n="reviews"></span></div>
+      </div>
+    </div>
+    <div class="hero-art">
+      <span class="glyph">🧠</span>
+      <div class="float f1">🤖 Machine Learning</div>
+      <div class="float f2">✨ Generative AI</div>
+      <div class="float f3">📊 Data Science</div>
+    </div>
+  </div>
+</section>
+
+<section id="categories">
+  <div class="container">
+    <div class="section-head"><h2 data-i18n="browse_cat"></h2></div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+</section>
+
+<section style="background:#fff">
+  <div class="container">
+    <div class="section-head">
+      <h2 data-i18n="featured"></h2>
+      <a href="/courses.html" class="btn btn-ghost btn-sm" data-i18n="all_courses"></a>
+    </div>
+    <div class="course-grid" id="featGrid"><div class="spinner"></div></div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-head center" style="justify-content:center"><h2 data-i18n="why_title"></h2></div>
+    <div class="why-grid">
+      <div class="why-card"><div class="ico">🇧🇩</div><h4 data-i18n="why1_t"></h4><p class="muted" data-i18n="why1_d"></p></div>
+      <div class="why-card"><div class="ico">♾️</div><h4 data-i18n="why2_t"></h4><p class="muted" data-i18n="why2_d"></p></div>
+      <div class="why-card"><div class="ico">🎓</div><h4 data-i18n="why3_t"></h4><p class="muted" data-i18n="why3_d"></p></div>
+      <div class="why-card"><div class="ico">📱</div><h4 data-i18n="why4_t"></h4><p class="muted" data-i18n="why4_d"></p></div>
+    </div>
+  </div>
+</section>
+
+<footer id="site-footer"></footer>
+
+<script src="/js/i18n.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/components.js"></script>
+<script>
+async function loadHome(){
+  try{
+    const [cats, courses] = await Promise.all([
+      API.get('/courses/categories'), API.get('/courses?sort=popular')
+    ]);
+    document.getElementById('stCourses').textContent = courses.courses.length;
+    const cg = document.getElementById('catGrid');
+    cg.innerHTML = cats.categories.map(c=>`
+      <a class="cat-card" href="/courses.html?category=${c.slug}">
+        <div class="ico">${c.icon||'📚'}</div>
+        <h4>${L(c,'name')}</h4>
+        <span class="muted">${c.courseCount} ${t('nav_courses')}</span>
+      </a>`).join('');
+    const fg = document.getElementById('featGrid');
+    const feat = courses.courses.slice(0,6);
+    fg.innerHTML = feat.length ? feat.map(courseCard).join('') : `<div class="empty">${t('empty_courses')}</div>`;
+  }catch(e){ document.getElementById('featGrid').innerHTML = `<div class="empty">${e.message}</div>`; }
+}
+document.addEventListener('DOMContentLoaded', loadHome);
+document.addEventListener('langchange', loadHome);
+</script>
+<script src="/js/app.js"></script>
+</body>
+</html>

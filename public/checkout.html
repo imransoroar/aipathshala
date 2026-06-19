@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="bn" data-lang="bn">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Checkout — AI Pathshala</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header id="site-header"></header>
+<main class="page"><div class="container">
+  <div class="page-head"><h1 data-i18n="checkout"></h1></div>
+  <div id="root"><div class="spinner"></div></div>
+</div></main>
+<footer id="site-footer"></footer>
+<script src="/js/i18n.js"></script>
+<script src="/js/api.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const courseId = params.get('course');
+const orderId = params.get('order');
+let gateway = 'bkash';
+
+function methodRow(id,label,sub){
+  return `<div class="pay-method ${id===gateway?'active':''}" data-g="${id}">
+    <div class="pm-logo pm-${id}">${label}</div>
+    <div><b>${label}</b><div class="muted" style="font-size:.85rem">${sub}</div></div>
+    <div style="margin-${getLang()==='bn'?'right':'left'}:auto">${id===gateway?'●':'○'}</div>
+  </div>`;
+}
+
+async function renderCheckout(){
+  if(!requireLogin()) return;
+  let course;
+  try{ course = (await API.get('/courses/by-id/'+courseId)).course; }
+  catch(e){ document.getElementById('root').innerHTML=`<div class="empty">${e.message}</div>`; return; }
+  const amount = course.discountPrice && course.discountPrice<course.price ? course.discountPrice : course.price;
+  document.getElementById('root').innerHTML = `
+  <div class="checkout-grid">
+    <div>
+      <h3 data-i18n="pay_with">${t('pay_with')}</h3>
+      <div id="methods">
+        ${methodRow('bkash','bKash','01XXXXXXXXX')}
+        ${methodRow('nagad','Nagad','01XXXXXXXXX')}
+        ${methodRow('sslcommerz','SSLCommerz','Card / NetBank / MFS')}
+      </div>
+      <div class="demo-hint" style="margin-top:14px" data-i18n="sandbox_note">${t('sandbox_note')}</div>
+      <button class="btn btn-primary btn-block" id="payBtn" style="margin-top:18px">${t('pay_now')} • ${money(amount,course.currency)}</button>
+    </div>
+    <div class="summary-card">
+      <h3 data-i18n="order_summary">${t('order_summary')}</h3>
+      <div style="display:flex;gap:12px;margin:14px 0">
+        ${course.thumbnail?`<img src="${course.thumbnail}" style="width:90px;border-radius:8px" onerror="this.style.display='none'">`:''}
+        <div><b>${L(course,'title')}</b><div class="muted" style="font-size:.85rem">${course.instructor}</div></div>
+      </div>
+      <div class="summary-row"><span>${L(course,'title')}</span><span>${money(course.price,course.currency)}</span></div>
+      ${amount<course.price?`<div class="summary-row" style="color:var(--ok)"><span>Discount</span><span>- ${money(course.price-amount)}</span></div>`:''}
+      <div class="summary-total"><span data-i18n="total">${t('total')}</span><span>${money(amount,course.currency)}</span></div>
+    </div>
+  </div>`;
+  document.querySelectorAll('.pay-method').forEach(m=>m.onclick=()=>{ gateway=m.dataset.g; renderCheckout(); });
+  document.getElementById('payBtn').onclick = async (e)=>{
+    e.target.disabled=true;
+    try{
+      const r = await API.post('/payments/checkout',{courseId:Number(courseId), gateway});
+      if(r.free){ location.href = r.redirect; return; }
+      location.href = r.redirectUrl; // sandbox -> simulated payment page
+    }catch(err){ toast(err.message,'err'); e.target.disabled=false; }
+  };
+  applyI18n();
+}
+
+async function renderSimPay(){
+  if(!requireLogin()) return;
+  let order;
+  try{ order = (await API.get('/payments/orders/'+orderId)).order; }
+  catch(e){ document.getElementById('root').innerHTML=`<div class="empty">${e.message}</div>`; return; }
+  const c = order.course || {};
+  document.getElementById('root').innerHTML = `
+  <div class="auth-wrap" style="max-width:480px">
+    <div class="pm-logo pm-${order.gateway}" style="width:auto;padding:8px 16px;margin:0 auto 14px;font-size:1rem">${order.gateway.toUpperCase()}</div>
+    <h1 style="font-size:1.3rem">${t('checkout')}</h1>
+    <div class="summary-row"><span>Invoice</span><b>${order.invoice}</b></div>
+    <div class="summary-row"><span>${L(c,'title')||'Course'}</span><b>${money(order.amount,order.currency)}</b></div>
+    <div class="summary-total"><span data-i18n="total">${t('total')}</span><span>${money(order.amount,order.currency)}</span></div>
+    <div class="demo-hint" style="margin:16px 0">${t('sandbox_note')}</div>
+    ${order.status==='paid'
+      ? `<div class="center"><p style="color:var(--ok);font-weight:700">✓ ${t('payment_success')}</p><a class="btn btn-primary btn-block" href="/learn.html?course=${order.courseId}">${t('go_to_course')}</a></div>`
+      : `<button class="btn btn-accent btn-block" id="simBtn">${t('sim_pay')}</button>`}
+  </div>`;
+  const b = document.getElementById('simBtn');
+  if(b) b.onclick = async ()=>{
+    b.disabled=true; b.textContent=t('loading');
+    try{
+      const r = await API.post('/payments/execute',{orderId:Number(orderId)});
+      toast(t('payment_success'),'ok');
+      setTimeout(()=>location.href=r.redirect, 700);
+    }catch(err){ toast(err.message,'err'); b.disabled=false; b.textContent=t('sim_pay'); }
+  };
+  applyI18n();
+}
+
+function route(){ if(orderId) renderSimPay(); else if(courseId) renderCheckout(); else location.href='/courses.html'; }
+document.addEventListener('DOMContentLoaded', route);
+document.addEventListener('langchange', route);
+</script>
+<script src="/js/app.js"></script>
+</body>
+</html>
