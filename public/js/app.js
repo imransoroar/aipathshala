@@ -105,3 +105,48 @@ function bootShell() {
   document.addEventListener('langchange', () => { renderHeader(); renderFooter(); applyI18n(); });
 }
 document.addEventListener('DOMContentLoaded', bootShell);
+
+/* ============ premium interactions (added) ============ */
+// Sticky header shadow on scroll
+function initScrollHeader(){
+  const h=document.getElementById('site-header');
+  if(!h) return;
+  const on=()=>h.classList.toggle('scrolled', window.scrollY>8);
+  on(); window.addEventListener('scroll', on, {passive:true});
+}
+
+// Scroll-reveal using IntersectionObserver
+let _revealObs=null;
+function initReveal(){
+  if(!('IntersectionObserver' in window)){ document.querySelectorAll('.reveal').forEach(e=>e.classList.add('in')); return; }
+  _revealObs=new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); _revealObs.unobserve(e.target); } });
+  },{threshold:.12, rootMargin:'0px 0px -40px 0px'});
+  revealScan();
+}
+function revealScan(){ if(_revealObs) document.querySelectorAll('.reveal:not(.in)').forEach(e=>_revealObs.observe(e)); }
+window.revealScan=revealScan;
+
+// Animated number counters: <b data-count="2000" data-suffix="+">
+function animateCounters(scope){
+  (scope||document).querySelectorAll('[data-count]:not(.counted)').forEach(el=>{
+    const target=parseFloat(el.getAttribute('data-count'))||0;
+    const suffix=el.getAttribute('data-suffix')||'';
+    const dec=(el.getAttribute('data-dec')|0);
+    el.classList.add('counted');
+    const run=()=>{
+      const dur=1400, t0=performance.now();
+      const tick=(t)=>{ const p=Math.min(1,(t-t0)/dur); const e=1-Math.pow(1-p,3);
+        const v=target*e; el.textContent=(dec?v.toFixed(dec):Math.round(v).toLocaleString(getLang()==='bn'?'bn-BD':'en-US'))+suffix;
+        if(p<1) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
+    };
+    if('IntersectionObserver' in window){
+      const o=new IntersectionObserver((en)=>{en.forEach(x=>{if(x.isIntersecting){run();o.disconnect();}})},{threshold:.4});
+      o.observe(el);
+    } else run();
+  });
+}
+window.animateCounters=animateCounters;
+
+document.addEventListener('DOMContentLoaded', ()=>{ initScrollHeader(); initReveal(); animateCounters(); });

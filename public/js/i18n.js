@@ -96,3 +96,37 @@ window.L = (obj, base) => {
   const bn = obj[base + 'Bn'];
   return getLang() === 'bn' && bn ? bn : (obj[base] || bn || '');
 };
+
+/* ===== extra strings for the redesigned homepage ===== */
+Object.assign(window.I18N.bn, {
+  hero_badge: '🇧🇩 #১ বাংলা এআই লার্নিং প্ল্যাটফর্ম',
+  hero_title_a: 'ভবিষ্যতের স্কিল', hero_title_b: 'শিখুন আজই',
+  hero_learners: 'জন শিক্ষার্থী শিখছেন', rating_word: 'রেটিং',
+  trust_word: 'যাদের আস্থা', browse_all: 'সব কোর্স দেখুন',
+  how_title: 'কীভাবে কাজ করে', how_sub: 'তিনটি সহজ ধাপে শেখা শুরু করুন',
+  step1_t: 'অ্যাকাউন্ট খুলুন', step1_d: 'ফ্রি সাইন আপ করে আপনার পছন্দের কোর্স বেছে নিন।',
+  step2_t: 'কোর্স কিনুন', step2_d: 'বিকাশ, নগদ বা কার্ডে নিরাপদে পেমেন্ট করুন।',
+  step3_t: 'শিখুন ও সার্টিফিকেট নিন', step3_d: 'নিজের গতিতে শিখুন, কোর্স শেষে সার্টিফিকেট পান।',
+  testi_title: 'শিক্ষার্থীরা যা বলছেন', testi_sub: 'হাজারো শিক্ষার্থীর আস্থা',
+  t1: 'সহজ বাংলায় এত সুন্দর করে এআই শেখানো হয়েছে যে আমি অভিভূত। চাকরিতে কাজে লাগছে!', t1n: 'রিয়া আক্তার', t1r: 'মার্কেটিং এক্সিকিউটিভ',
+  t2: 'পাইথন কোর্সটা করে নিজের প্রথম প্রজেক্ট বানিয়েছি। ইন্সট্রাক্টর দারুণ।', t2n: 'সাকিব হাসান', t2r: 'শিক্ষার্থী',
+  t3: 'প্রম্পট ইঞ্জিনিয়ারিং কোর্সটা আমার ফ্রিল্যান্সিং আয় দ্বিগুণ করেছে।', t3n: 'নাফিসা রহমান', t3r: 'ফ্রিল্যান্সার',
+  cta_title: 'আজই আপনার শেখার যাত্রা শুরু করুন', cta_sub: 'হাজারো শিক্ষার্থীর সাথে যোগ দিন এবং ভবিষ্যতের স্কিল আয়ত্ত করুন।',
+  cta_btn: 'ফ্রি অ্যাকাউন্ট খুলুন', cta_btn2: 'কোর্স ব্রাউজ করুন',
+});
+Object.assign(window.I18N.en, {
+  hero_badge: '🇧🇩 #1 Bangla AI learning platform',
+  hero_title_a: 'Learn the skills', hero_title_b: 'of the future today',
+  hero_learners: 'learners growing with us', rating_word: 'rating',
+  trust_word: 'Trusted by teams at', browse_all: 'Browse all courses',
+  how_title: 'How it works', how_sub: 'Start learning in three simple steps',
+  step1_t: 'Create an account', step1_d: 'Sign up free and pick the course that fits your goals.',
+  step2_t: 'Buy the course', step2_d: 'Pay securely with bKash, Nagad or card.',
+  step3_t: 'Learn & get certified', step3_d: 'Learn at your own pace and earn a certificate.',
+  testi_title: 'What learners say', testi_sub: 'Trusted by thousands of students',
+  t1: 'AI explained so clearly in Bangla — I was blown away. It already helps at my job!', t1n: 'Ria Akter', t1r: 'Marketing Executive',
+  t2: 'I built my first project after the Python course. The instructor is fantastic.', t2n: 'Sakib Hasan', t2r: 'Student',
+  t3: 'The prompt engineering course doubled my freelancing income.', t3n: 'Nafisa Rahman', t3r: 'Freelancer',
+  cta_title: 'Start your learning journey today', cta_sub: 'Join thousands of learners and master the skills of the future.',
+  cta_btn: 'Create free account', cta_btn2: 'Browse courses',
+});
