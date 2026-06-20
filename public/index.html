@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI Pathshala — এআই পাঠশালা</title>
 <meta name="description" content="সহজ বাংলায় এআই, প্রোগ্রামিং ও ডেটা সায়েন্স শিখুন।">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
@@ -15,52 +13,112 @@
 <section class="hero">
   <div class="container hero-grid">
     <div>
-      <h1 data-i18n="hero_title"></h1>
-      <p data-i18n="hero_sub"></p>
-      <div class="hero-cta">
-        <a href="/courses.html" class="btn btn-primary" data-i18n="hero_cta"></a>
-        <a href="/register.html" class="btn btn-ghost" data-i18n="hero_cta2"></a>
+      <span class="eyebrow reveal" data-i18n="hero_badge"></span>
+      <h1 class="reveal d1"><span data-i18n="hero_title_a"></span> <span class="grad-text" data-i18n="hero_title_b"></span></h1>
+      <p class="lead reveal d2" data-i18n="hero_sub"></p>
+      <div class="hero-cta reveal d3">
+        <a href="/courses.html" class="btn btn-primary btn-lg" data-i18n="hero_cta"></a>
+        <a href="/register.html" class="btn btn-ghost btn-lg" data-i18n="hero_cta2"></a>
       </div>
-      <div class="hero-stats">
-        <div><b id="stCourses">—</b><span class="muted" data-i18n="all_courses"></span></div>
-        <div><b id="stStudents">2K+</b><span class="muted" data-i18n="students"></span></div>
-        <div><b>4.8★</b><span class="muted" data-i18n="reviews"></span></div>
+      <div class="hero-stats reveal d4">
+        <div><div class="num"><b data-count="6">6</b></div><div class="lbl" data-i18n="all_courses"></div></div>
+        <div><div class="num"><b data-count="2400" data-suffix="+">2400+</b></div><div class="lbl" data-i18n="hero_learners"></div></div>
+        <div><div class="num"><b data-count="4.8" data-dec="1">4.8</b>★</div><div class="lbl" data-i18n="rating_word"></div></div>
+      </div>
+      <div class="hero-trust reveal d4">
+        <div class="avatars"><span>র</span><span>S</span><span>না</span><span>A</span><span>+</span></div>
+        <span data-i18n="testi_sub"></span>
       </div>
     </div>
-    <div class="hero-art">
-      <span class="glyph">🧠</span>
-      <div class="float f1">🤖 Machine Learning</div>
-      <div class="float f2">✨ Generative AI</div>
-      <div class="float f3">📊 Data Science</div>
+    <div class="hero-art reveal d2">
+      <div class="hero-orb"></div>
+      <div class="hero-orb two"></div>
+      <div class="hero-glyph">🧠</div>
+      <div class="float-card fc1"><span class="dot"></span> Machine Learning</div>
+      <div class="float-card fc2"><span class="dot"></span> Generative AI</div>
+      <div class="float-card fc3"><span class="dot"></span> Data Science</div>
     </div>
   </div>
 </section>
 
+<div class="marquee">
+  <div class="marquee-track">
+    <span>🤖 ChatGPT</span><span>✨ Claude</span><span>🐍 Python</span><span>📊 Pandas</span><span>🔥 PyTorch</span>
+    <span>🧮 scikit-learn</span><span>📈 Data Science</span><span>🎯 Prompt Engineering</span>
+    <span>🤖 ChatGPT</span><span>✨ Claude</span><span>🐍 Python</span><span>📊 Pandas</span><span>🔥 PyTorch</span>
+    <span>🧮 scikit-learn</span><span>📈 Data Science</span><span>🎯 Prompt Engineering</span>
+  </div>
+</div>
+
 <section id="categories">
   <div class="container">
-    <div class="section-head"><h2 data-i18n="browse_cat"></h2></div>
+    <div class="section-head reveal"><div><span class="eyebrow" data-i18n="nav_categories"></span><h2 data-i18n="browse_cat"></h2></div></div>
     <div class="cat-grid" id="catGrid"></div>
   </div>
 </section>
 
 <section style="background:#fff">
   <div class="container">
-    <div class="section-head">
-      <h2 data-i18n="featured"></h2>
-      <a href="/courses.html" class="btn btn-ghost btn-sm" data-i18n="all_courses"></a>
+    <div class="section-head reveal">
+      <div><span class="eyebrow">★ Top rated</span><h2 data-i18n="featured"></h2></div>
+      <a href="/courses.html" class="btn btn-ghost" data-i18n="browse_all"></a>
     </div>
-    <div class="course-grid" id="featGrid"><div class="spinner"></div></div>
+    <div class="course-grid" id="featGrid"></div>
   </div>
 </section>
 
 <section>
   <div class="container">
-    <div class="section-head center" style="justify-content:center"><h2 data-i18n="why_title"></h2></div>
+    <div class="section-head center reveal" style="justify-content:center;flex-direction:column;text-align:center">
+      <span class="eyebrow" data-i18n="how_title"></span><h2 data-i18n="how_sub"></h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal d1"><h4 data-i18n="step1_t"></h4><p class="muted" data-i18n="step1_d"></p></div>
+      <div class="step reveal d2"><h4 data-i18n="step2_t"></h4><p class="muted" data-i18n="step2_d"></p></div>
+      <div class="step reveal d3"><h4 data-i18n="step3_t"></h4><p class="muted" data-i18n="step3_d"></p></div>
+    </div>
+  </div>
+</section>
+
+<section style="background:#fff">
+  <div class="container">
+    <div class="section-head center reveal" style="justify-content:center;flex-direction:column;text-align:center">
+      <span class="eyebrow">✦ AI Pathshala</span><h2 data-i18n="why_title"></h2>
+    </div>
     <div class="why-grid">
-      <div class="why-card"><div class="ico">🇧🇩</div><h4 data-i18n="why1_t"></h4><p class="muted" data-i18n="why1_d"></p></div>
-      <div class="why-card"><div class="ico">♾️</div><h4 data-i18n="why2_t"></h4><p class="muted" data-i18n="why2_d"></p></div>
-      <div class="why-card"><div class="ico">🎓</div><h4 data-i18n="why3_t"></h4><p class="muted" data-i18n="why3_d"></p></div>
-      <div class="why-card"><div class="ico">📱</div><h4 data-i18n="why4_t"></h4><p class="muted" data-i18n="why4_d"></p></div>
+      <div class="why-card reveal d1"><div class="ico">🇧🇩</div><h4 data-i18n="why1_t"></h4><p class="muted" data-i18n="why1_d"></p></div>
+      <div class="why-card reveal d2"><div class="ico">♾️</div><h4 data-i18n="why2_t"></h4><p class="muted" data-i18n="why2_d"></p></div>
+      <div class="why-card reveal d3"><div class="ico">🎓</div><h4 data-i18n="why3_t"></h4><p class="muted" data-i18n="why3_d"></p></div>
+      <div class="why-card reveal d4"><div class="ico">📱</div><h4 data-i18n="why4_t"></h4><p class="muted" data-i18n="why4_d"></p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="section-head center reveal" style="justify-content:center;flex-direction:column;text-align:center">
+      <span class="eyebrow">★ 4.8 / 5</span><h2 data-i18n="testi_title"></h2>
+    </div>
+    <div class="course-grid">
+      <div class="tcard reveal d1"><div class="stars">★★★★★</div><p class="quote" data-i18n="t1"></p>
+        <div class="who"><div class="av">র</div><div><b data-i18n="t1n"></b><div class="muted" style="font-size:.85rem" data-i18n="t1r"></div></div></div></div>
+      <div class="tcard reveal d2"><div class="stars">★★★★★</div><p class="quote" data-i18n="t2"></p>
+        <div class="who"><div class="av">S</div><div><b data-i18n="t2n"></b><div class="muted" style="font-size:.85rem" data-i18n="t2r"></div></div></div></div>
+      <div class="tcard reveal d3"><div class="stars">★★★★★</div><p class="quote" data-i18n="t3"></p>
+        <div class="who"><div class="av">না</div><div><b data-i18n="t3n"></b><div class="muted" style="font-size:.85rem" data-i18n="t3r"></div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="cta-band reveal">
+      <h2 data-i18n="cta_title"></h2>
+      <p data-i18n="cta_sub"></p>
+      <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+        <a href="/register.html" class="btn btn-light btn-lg" data-i18n="cta_btn"></a>
+        <a href="/courses.html" class="btn btn-ghost btn-lg" data-i18n="cta_btn2"></a>
+      </div>
     </div>
   </div>
 </section>
@@ -72,22 +130,23 @@
 <script src="/js/components.js"></script>
 <script>
 async function loadHome(){
+  const fg=document.getElementById('featGrid');
+  fg.innerHTML=skeletonCards(6);
   try{
-    const [cats, courses] = await Promise.all([
+    const [cats, courses]=await Promise.all([
       API.get('/courses/categories'), API.get('/courses?sort=popular')
     ]);
-    document.getElementById('stCourses').textContent = courses.courses.length;
-    const cg = document.getElementById('catGrid');
-    cg.innerHTML = cats.categories.map(c=>`
-      <a class="cat-card" href="/courses.html?category=${c.slug}">
+    const cg=document.getElementById('catGrid');
+    cg.innerHTML=cats.categories.map((c,i)=>`
+      <a class="cat-card reveal d${(i%4)+1}" href="/courses.html?category=${c.slug}">
         <div class="ico">${c.icon||'📚'}</div>
         <h4>${L(c,'name')}</h4>
         <span class="muted">${c.courseCount} ${t('nav_courses')}</span>
       </a>`).join('');
-    const fg = document.getElementById('featGrid');
-    const feat = courses.courses.slice(0,6);
-    fg.innerHTML = feat.length ? feat.map(courseCard).join('') : `<div class="empty">${t('empty_courses')}</div>`;
-  }catch(e){ document.getElementById('featGrid').innerHTML = `<div class="empty">${e.message}</div>`; }
+    const feat=courses.courses.slice(0,6);
+    fg.innerHTML=feat.length ? feat.map(courseCard).join('') : `<div class="empty">${t('empty_courses')}</div>`;
+    if(window.revealScan) revealScan();
+  }catch(e){ fg.innerHTML=`<div class="empty">${e.message}</div>`; }
 }
 document.addEventListener('DOMContentLoaded', loadHome);
 document.addEventListener('langchange', loadHome);
