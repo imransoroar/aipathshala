@@ -112,9 +112,12 @@ function seedDatabase(db) {
   courses.forEach((c) => {
     const { lessons, ...courseData } = c;
     const course = db.insert('courses', courseData);
+    const half = Math.ceil(lessons.length / 2);
     lessons.forEach((l, i) => db.insert('lessons', {
       courseId: course.id, title: l.title, titleBn: l.titleBn, videoUrl: yt(l.video),
       content: '', durationMin: l.durationMin, order: i + 1, preview: !!l.preview,
+      section: i < half ? 'Getting Started' : 'Core Concepts',
+      sectionBn: i < half ? 'শুরুর ধাপ' : 'মূল ধারণা',
     }));
   });
 
