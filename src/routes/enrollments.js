@@ -41,6 +41,7 @@ router.get('/:courseId/player', requireAuth, (req, res) => {
     .sort((a, b) => a.order - b.order)
     .map((l) => ({
       id: l.id, title: l.title, titleBn: l.titleBn, order: l.order,
+      section: l.section || '', sectionBn: l.sectionBn || '',
       durationMin: l.durationMin, videoUrl: l.videoUrl, content: l.content,
       completed: enrollment ? (enrollment.completedLessons || []).includes(l.id) : false,
     }));

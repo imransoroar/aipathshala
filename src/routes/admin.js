@@ -122,6 +122,7 @@ router.post('/courses/:id/lessons', (req, res) => {
     courseId, title: b.title || 'Untitled lesson', titleBn: b.titleBn || b.title || '',
     videoUrl: b.videoUrl || '', content: b.content || '', durationMin: Number(b.durationMin) || 0,
     order, preview: !!b.preview,
+    section: (b.section || '').trim(), sectionBn: (b.sectionBn || '').trim(),
   });
   res.status(201).json({ lesson });
 });
@@ -129,7 +130,7 @@ router.post('/courses/:id/lessons', (req, res) => {
 router.patch('/lessons/:id', (req, res) => {
   const b = req.body || {};
   const patch = {};
-  for (const k of ['title', 'titleBn', 'videoUrl', 'content']) if (b[k] !== undefined) patch[k] = b[k];
+  for (const k of ['title', 'titleBn', 'videoUrl', 'content', 'section', 'sectionBn']) if (b[k] !== undefined) patch[k] = b[k];
   if (b.durationMin !== undefined) patch.durationMin = Number(b.durationMin) || 0;
   if (b.order !== undefined) patch.order = Number(b.order);
   if (b.preview !== undefined) patch.preview = !!b.preview;

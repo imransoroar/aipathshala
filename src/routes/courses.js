@@ -70,6 +70,8 @@ router.get('/:slug', (req, res) => {
         id: l.id,
         title: l.title,
         titleBn: l.titleBn,
+        section: l.section || '',
+        sectionBn: l.sectionBn || '',
         order: l.order,
         durationMin: l.durationMin,
         preview: l.preview,
