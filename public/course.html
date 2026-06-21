@@ -32,12 +32,22 @@ function render(){
     ? `<a href="/learn.html?course=${c.id}" class="btn btn-primary btn-block">${t('continue')}</a>`
     : `<button class="btn btn-primary btn-block" id="buyBtn">${(c.price>0)?t('buy_now'):t('enroll')}</button>`;
 
-  const lessonRows = lessons.map(l=>`
-    <div class="lesson-item">
-      <div class="ix">${l.order}</div>
-      <div class="l-title">${L(l,'title')} ${l.preview?`<span class="pill blue">${t('preview')}</span>`:''}</div>
-      <div class="l-dur">${l.locked?'🔒':'▶'} ${l.durationMin||0}m</div>
-    </div>`).join('');
+  // group lessons by section (subcategory), preserving order
+  const _groups=[], _idx={};
+  lessons.forEach(l=>{ const key=(L(l,'section')||'').trim()||'__none';
+    if(!(key in _idx)){ _idx[key]=_groups.length; _groups.push({name:L(l,'section')||'', items:[] }); }
+    _groups[_idx[key]].items.push(l); });
+  const lessonRows = _groups.map((g,gi)=>`
+    ${g.name?`<div style="font-weight:800;color:var(--primary);margin:${gi?'22px':'4px'} 0 10px;display:flex;align-items:center;gap:8px">
+       <span style="width:26px;height:26px;border-radius:8px;background:var(--violet-50);display:grid;place-items:center;font-size:.8rem">${gi+1}</span>
+       ${g.name} <span class="muted" style="font-weight:500;font-size:.85rem">· ${g.items.length} ${t('lessons')}</span></div>`:''}
+    ${g.items.map(l=>`
+      <div class="lesson-item">
+        <div class="ix">${l.order}</div>
+        <div class="l-title">${L(l,'title')} ${l.preview?`<span class="pill blue">${t('preview')}</span>`:''}</div>
+        <div class="l-dur">${l.locked?'🔒':'▶'} ${l.durationMin||0}m</div>
+      </div>`).join('')}
+  `).join('');
 
   const reviewRows = reviews.length ? reviews.map(r=>`
     <div class="review"><div class="who">${r.userName} <span class="stars">${stars(r.rating)}</span></div>

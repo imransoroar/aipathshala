@@ -129,25 +129,48 @@ window.editCourse = async (id)=>{
 window.delCourse = async (id)=>{ if(!confirm('Delete this course?')) return;
   try{ await API.del('/admin/courses/'+id); toast(t('delete'),'ok'); render(); }catch(e){ toast(e.message,'err'); } };
 
+let _lessonCtx={courseId:null,title:''};
+function _esc(x){ return String(x||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
+
 window.manageLessons = async (courseId,title)=>{
+  if(title) _lessonCtx={courseId,title}; else { _lessonCtx.courseId=courseId; title=_lessonCtx.title||''; }
   const {lessons} = await API.get('/admin/courses/'+courseId+'/lessons');
+  lessons.sort((a,b)=>a.order-b.order);
+  // group by section, preserving first-seen order
+  const groups=[], idx={};
+  lessons.forEach(l=>{ const key=(l.section||'').trim()||'__none';
+    if(!(key in idx)){ idx[key]=groups.length; groups.push({name:l.section||'', nameBn:l.sectionBn||'', items:[]}); }
+    groups[idx[key]].items.push(l); });
+  const groupHtml = groups.map(g=>`
+    <div class="lesson-group" style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0;padding-bottom:6px;border-bottom:2px solid var(--violet-50)">
+        <div style="font-weight:800;color:var(--primary)">${g.name? '📂 '+(getLang()==='bn'&&g.nameBn?g.nameBn:g.name) : t('section_other')}</div>
+        <button class="btn btn-sm btn-ghost" onclick="editLesson(${courseId},null,'${_esc(g.name)}','${_esc(g.nameBn)}')">+ ${t('add_lesson')}</button>
+      </div>
+      ${g.items.map(l=>`<div class="lesson-item" style="margin-bottom:8px">
+        <div class="ix">${l.order}</div>
+        <div class="l-title">${l.title}<div class="muted" style="font-size:.78rem">${l.durationMin}m ${l.preview?'• preview':''}</div></div>
+        <button class="btn btn-sm btn-ghost" onclick="editLesson(${courseId},${l.id})">${t('edit')}</button>
+        <button class="btn btn-sm btn-danger" onclick="delLesson(${courseId},${l.id})">×</button>
+      </div>`).join('')}
+    </div>`).join('') || `<p class="muted">—</p>`;
   openModal(`
     <h3>${t('lessons')} — ${title}</h3>
-    <div id="lessonList">${lessons.map(l=>`<div class="lesson-item" style="margin-bottom:8px">
-      <div class="ix">${l.order}</div>
-      <div class="l-title">${l.title}<div class="muted" style="font-size:.78rem">${l.durationMin}m ${l.preview?'• preview':''}</div></div>
-      <button class="btn btn-sm btn-ghost" onclick="editLesson(${courseId},${l.id})">${t('edit')}</button>
-      <button class="btn btn-sm btn-danger" onclick="delLesson(${courseId},${l.id},'${title.replace(/'/g,'')}')">×</button>
-    </div>`).join('')||`<p class="muted">—</p>`}</div>
-    <button class="btn btn-primary btn-sm" onclick="editLesson(${courseId},null)" style="margin-top:8px">+ ${t('lessons')}</button>
+    <p class="muted" style="font-size:.85rem;margin-top:-8px">${t('section_hint')}</p>
+    <div id="lessonList">${groupHtml}</div>
+    <button class="btn btn-primary btn-sm" onclick="editLesson(${courseId},null)" style="margin-top:8px">+ ${t('add_lesson')}</button>
     <div style="text-align:right;margin-top:14px"><button class="btn btn-ghost" onclick="closeModal()">${t('cancel')}</button></div>`);
 };
 
-window.editLesson = async (courseId,id)=>{
-  let l={title:'',titleBn:'',videoUrl:'',content:'',durationMin:0,order:'',preview:false};
+window.editLesson = async (courseId,id,presetSection,presetSectionBn)=>{
+  let l={title:'',titleBn:'',videoUrl:'',content:'',durationMin:0,order:'',preview:false,section:presetSection||'',sectionBn:presetSectionBn||''};
   if(id){ const {lessons}=await API.get('/admin/courses/'+courseId+'/lessons'); l=lessons.find(x=>x.id===id)||l; }
   openModal(`
     <h3>${id?t('edit'):''} ${t('lessons')}</h3>
+    <div class="grid2">
+      <div class="field"><label>${t('section_label')} (EN)</label><input class="input" id="l_section" value="${(l.section||'').replace(/"/g,'&quot;')}" placeholder="e.g. Getting Started"></div>
+      <div class="field"><label>${t('section_label')} (বাংলা)</label><input class="input" id="l_sectionBn" value="${(l.sectionBn||'').replace(/"/g,'&quot;')}" placeholder="যেমন: শুরুর ধাপ"></div>
+    </div>
     <div class="grid2">
       <div class="field"><label>${t('title')} (EN)</label><input class="input" id="l_title" value="${(l.title||'').replace(/"/g,'&quot;')}"></div>
       <div class="field"><label>${t('title')} (বাংলা)</label><input class="input" id="l_titleBn" value="${(l.titleBn||'').replace(/"/g,'&quot;')}"></div>
@@ -165,15 +188,16 @@ window.editLesson = async (courseId,id)=>{
     </div>`);
   document.getElementById('saveLesson').onclick=async()=>{
     const body={title:l_title.value,titleBn:l_titleBn.value,videoUrl:l_videoUrl.value,content:l_content.value,
-      durationMin:Number(l_durationMin.value)||0,preview:l_preview.checked};
+      durationMin:Number(l_durationMin.value)||0,preview:l_preview.checked,
+      section:l_section.value,sectionBn:l_sectionBn.value};
     if(l_order.value) body.order=Number(l_order.value);
     try{ if(id) await API.patch('/admin/lessons/'+id,body); else await API.post('/admin/courses/'+courseId+'/lessons',body);
-      toast(t('save'),'ok'); manageLessons(courseId,''); render();
+      toast(t('save'),'ok'); manageLessons(courseId); render();
     }catch(e){ toast(e.message,'err'); }
   };
 };
-window.delLesson = async (courseId,id,title)=>{ if(!confirm('Delete lesson?')) return;
-  try{ await API.del('/admin/lessons/'+id); toast('×','ok'); manageLessons(courseId,title); render(); }catch(e){ toast(e.message,'err'); } };
+window.delLesson = async (courseId,id)=>{ if(!confirm('Delete lesson?')) return;
+  try{ await API.del('/admin/lessons/'+id); toast('×','ok'); manageLessons(courseId); render(); }catch(e){ toast(e.message,'err'); } };
 
 async function renderUsers(main){
   const {users} = await API.get('/admin/users');
