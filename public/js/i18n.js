@@ -130,3 +130,17 @@ Object.assign(window.I18N.en, {
   cta_title: 'Start your learning journey today', cta_sub: 'Join thousands of learners and master the skills of the future.',
   cta_btn: 'Create free account', cta_btn2: 'Browse courses',
 });
+
+/* ===== sections + player strings ===== */
+Object.assign(window.I18N.bn, {
+  section_label:'সেকশন / সাবক্যাটাগরি', section_other:'অন্যান্য লেসন', add_lesson:'নতুন লেসন',
+  section_hint:'লেসনগুলো সেকশন বা সাবক্যাটাগরিতে ভাগ করুন।',
+  autoplay:'অটো-প্লে', up_next:'পরবর্তী', playing_next:'পরবর্তী ভিডিও শুরু হচ্ছে',
+  course_progress:'কোর্স অগ্রগতি', replay:'আবার দেখুন', next_lesson:'পরবর্তী লেসন',
+});
+Object.assign(window.I18N.en, {
+  section_label:'Section / Subcategory', section_other:'Other lessons', add_lesson:'New lesson',
+  section_hint:'Group lessons into sections / subcategories.',
+  autoplay:'Autoplay', up_next:'Up next', playing_next:'Playing next in',
+  course_progress:'Course progress', replay:'Replay', next_lesson:'Next lesson',
+});
